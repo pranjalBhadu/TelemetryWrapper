@@ -1,0 +1,33 @@
+{
+  "name": "opentelemetrywrapper",
+  "version": "1.1.0",
+  "description": "A wrapper class for opentelemetry",
+  "main": "dist/TelemetryProvider.js",
+  "types": "dist/TelemetryProvider.d.ts",
+  "files": [
+    "/dist"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pranjalBhadu/TelemetryWrapper.git"
+  },
+  "author": "pranjal Bhadu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pranjalBhadu/TelemetryWrapper/issues"
+  },
+  "homepage": "https://github.com/pranjalBhadu/TelemetryWrapper#readme",
+  "dependencies": {
+    "@azure/monitor-opentelemetry-exporter": "^1.0.0-beta.8",
+    "@opentelemetry/api": "^1.1.0",
+    "@opentelemetry/core": "^1.4.0",
+    "@opentelemetry/resources": "^1.4.0",
+    "@opentelemetry/sdk-trace-base": "^1.4.0",
+    "@opentelemetry/sdk-trace-node": "^1.4.0",
+    "@opentelemetry/semantic-conventions": "^1.4.0",
+    "typescript": "^4.7.4"
+  }
+}
