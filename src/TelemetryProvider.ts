@@ -37,10 +37,6 @@ export class TelemetryProvider{
         TelemetryProvider.TelemetryTracer = trace.getTracer(TracerName, TracerVersion)
     }
 
-    public static setConnectionString(connstr: string): void {
-        TelemetryProvider.ConnectionString = connstr;
-    }
-
     public static getTelemetryTracer(): Tracer {
         return TelemetryProvider.TelemetryTracer
     }

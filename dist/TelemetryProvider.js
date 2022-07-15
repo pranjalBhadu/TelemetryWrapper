@@ -10,7 +10,11 @@ const api_1 = require("@opentelemetry/api");
 const TelemetryConstants_1 = require("./TelemetryConstants");
 const { W3CTraceContextPropagator } = require("@opentelemetry/core");
 class TelemetryProvider {
-    constructor(TracerName, TracerVersion) {
+    constructor(TracerName, TracerVersion, ConnectionString) {
+        TelemetryProvider.TelemetryExporter = new monitor_opentelemetry_exporter_1.AzureMonitorTraceExporter({
+            connectionString: ConnectionString
+        });
+        TelemetryProvider.TelemetryProcessor = new sdk_trace_base_1.BatchSpanProcessor(TelemetryProvider.TelemetryExporter);
         TelemetryProvider.TelemetryResource =
             resources_1.Resource.default().merge(new resources_1.Resource({
                 [semantic_conventions_1.SemanticResourceAttributes.SERVICE_NAME]: TelemetryConstants_1.TelemetryConstants.ServiceName,
@@ -23,9 +27,6 @@ class TelemetryProvider {
         TelemetryProvider.Provider.register();
         api_1.trace.setGlobalTracerProvider(TelemetryProvider.Provider);
         TelemetryProvider.TelemetryTracer = api_1.trace.getTracer(TracerName, TracerVersion);
-    }
-    static setConnectionString(connstr) {
-        TelemetryProvider.ConnectionString = connstr;
     }
     static getTelemetryTracer() {
         return TelemetryProvider.TelemetryTracer;
@@ -77,8 +78,3 @@ class TelemetryProvider {
     }
 }
 exports.TelemetryProvider = TelemetryProvider;
-TelemetryProvider.TelemetryExporter = new monitor_opentelemetry_exporter_1.AzureMonitorTraceExporter({
-    connectionString: TelemetryProvider.ConnectionString
-});
-// private static TelemetryExporter = new ConsoleSpanExporter();
-TelemetryProvider.TelemetryProcessor = new sdk_trace_base_1.BatchSpanProcessor(TelemetryProvider.TelemetryExporter);
