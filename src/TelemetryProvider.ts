@@ -42,6 +42,7 @@ export class TelemetryProvider{
     }
 
     public static startTracing(spanName: string, activeSpan: Span|undefined = undefined, kind: number = 0, attributes: Object|null = null): Span{
+        console.log("start of span")
         const spanKind: SpanKind = TelemetryProvider.getSpanKind(kind)
         let span: Span;
         if(activeSpan!=undefined){
