@@ -53,6 +53,7 @@ export class TelemetryProvider{
         if(attributes != undefined){
             this.setSpanTags(span, attributes)
         }
+        console.log("span context: ")
         console.log(span.spanContext)
         return span
     }
