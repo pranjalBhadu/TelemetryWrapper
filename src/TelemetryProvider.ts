@@ -53,11 +53,8 @@ export class TelemetryProvider{
         if(attributes != undefined){
             this.setSpanTags(span, attributes)
         }
+        console.log(span.spanContext)
         return span
-    }
-
-    public static setParentSpan(span: Span): Context {
-        return trace.setSpan(context.active(), span)
     }
 
     public static getSpanKind(kind: number): SpanKind {
@@ -68,7 +65,7 @@ export class TelemetryProvider{
         return SpanKind.CONSUMER
     }
 
-    public static getCurrentSpan(): Span | undefined{
+    public static getSpanId(span): string | undefined{
         return trace.getSpan(context.active());
     }
 
