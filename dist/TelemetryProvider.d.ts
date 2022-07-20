@@ -1,4 +1,4 @@
-import { SpanKind, Span, Tracer } from "@opentelemetry/api";
+import { SpanKind, Span, Tracer, SpanContext } from "@opentelemetry/api";
 export declare class TelemetryProvider {
     private static TelemetryResource;
     private static Provider;
@@ -10,6 +10,7 @@ export declare class TelemetryProvider {
     static startTracing(spanName: string, activeSpan?: Span | undefined, kind?: number, attributes?: Object | null): Span;
     static startTracingWith(spanName: string, func: () => void): void;
     static getSpanKind(kind: number): SpanKind;
+    static getCurrentSpanContext(): SpanContext | undefined;
     static setSpanTags(span: Span, attributes: Object): void;
     static endTracing(span: Span): void;
 }

@@ -64,9 +64,9 @@ class TelemetryProvider {
             return api_1.SpanKind.PRODUCER;
         return api_1.SpanKind.CONSUMER;
     }
-    // public static getSpanId(span): string | undefined{
-    //     return trace.getSpan(context.active());
-    // }
+    static getCurrentSpanContext() {
+        return api_1.trace.getSpanContext(api_1.context.active());
+    }
     static setSpanTags(span, attributes) {
         if (attributes == null) {
             throw new Error("NULL MESSAGE!!");
