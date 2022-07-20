@@ -59,6 +59,11 @@ export class TelemetryProvider{
         return span
     }
 
+    public static startTracingWith(spanName: string, func: () => void){
+        const span: Span = TelemetryProvider.TelemetryTracer.startSpan(spanName);
+        context.with(trace.setSpan(context.active(), span), func)
+    }
+
     public static getSpanKind(kind: number): SpanKind {
         if(kind == 0) return SpanKind.INTERNAL
         else if(kind == 1) return SpanKind.SERVER
@@ -67,8 +72,8 @@ export class TelemetryProvider{
         return SpanKind.CONSUMER
     }
 
-    public static getSpanId(span): string | undefined{
-        return trace.getSpan(context.active());
+    public static getCurrentSpanContext(): SpanContext|undefined {
+        return trace.getSpanContext(context.active())
     }
 
     public static setSpanTags(span: Span, attributes: Object): void{

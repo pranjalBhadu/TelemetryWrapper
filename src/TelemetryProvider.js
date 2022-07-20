@@ -82,3 +82,4 @@ class TelemetryProvider {
     }
 }
 exports.TelemetryProvider = TelemetryProvider;
+//# sourceMappingURL=TelemetryProvider.js.map
