@@ -31,7 +31,7 @@ class TelemetryProvider {
     static getTelemetryTracer() {
         return TelemetryProvider.TelemetryTracer;
     }
-    static startTracing(spanName, activeSpan = undefined, kind = 0, attributes = null) {
+    static startTracing(spanName, isroot, activeSpan = undefined, kind = 0, attributes = null) {
         console.log("start of span");
         const spanKind = TelemetryProvider.getSpanKind(kind);
         let span;
@@ -40,7 +40,7 @@ class TelemetryProvider {
             span = TelemetryProvider.TelemetryTracer.startSpan(spanName, { kind: spanKind }, ctx);
         }
         else {
-            span = TelemetryProvider.TelemetryTracer.startSpan(spanName, { kind: spanKind });
+            span = TelemetryProvider.TelemetryTracer.startSpan(spanName, { kind: spanKind, root: isroot });
         }
         if (attributes != undefined) {
             this.setSpanTags(span, attributes);
