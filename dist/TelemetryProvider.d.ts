@@ -1,16 +1,23 @@
-import { SpanKind, Span, Tracer, SpanContext } from "@opentelemetry/api";
+import { Resource } from "@opentelemetry/resources";
+import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
+import { AzureMonitorTraceExporter } from "@azure/monitor-opentelemetry-exporter";
+import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
+import { SpanKind, Context, Span, Tracer, TimeInput, Attributes } from "@opentelemetry/api";
+import { MessageContext } from "./MessageContext";
 export declare class TelemetryProvider {
-    private static TelemetryResource;
-    private static Provider;
-    private static TelemetryExporter;
-    private static TelemetryProcessor;
-    static TelemetryTracer: Tracer;
+    TelemetryResource: Resource;
+    Provider: NodeTracerProvider;
+    TelemetryExporter: AzureMonitorTraceExporter;
+    TelemetryProcessor: BatchSpanProcessor;
+    TelemetryTracer: Tracer;
     constructor(TracerName: string, TracerVersion: string, ConnectionString: string);
-    static getTelemetryTracer(): Tracer;
-    static startTracing(spanName: string, isroot: boolean, activeSpan?: Span | undefined, kind?: number, attributes?: Object | null): Span;
-    static startTracingWith(spanName: string, func: () => void): void;
-    static getSpanKind(kind: number): SpanKind;
-    static getCurrentSpanContext(): SpanContext | undefined;
-    static setSpanTags(span: Span, attributes: Object): void;
-    static endTracing(span: Span): void;
+    startTracing(spanName: string, parentSpan?: Span | undefined, kind?: number, message?: MessageContext | undefined): Span;
+    addTraceEvent(span: Span, name: string, attrOrStartTime?: Attributes | TimeInput, startTime?: TimeInput): void;
+    getTelemetryTracer(): Tracer;
+    getActiveContext(): Context;
+    getSpanKind(kind: number): SpanKind;
+    setSpanTags(span: Span, message: MessageContext): void;
+    setInitialTags(span: Span): void;
+    endTracing(span: Span, endTime?: TimeInput): void;
+    getMessageContext(): MessageContext;
 }

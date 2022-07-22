@@ -8,52 +8,55 @@ const monitor_opentelemetry_exporter_1 = require("@azure/monitor-opentelemetry-e
 const sdk_trace_base_1 = require("@opentelemetry/sdk-trace-base");
 const api_1 = require("@opentelemetry/api");
 const TelemetryConstants_1 = require("./TelemetryConstants");
-const { W3CTraceContextPropagator } = require("@opentelemetry/core");
+const MessageContext_1 = require("./MessageContext");
 class TelemetryProvider {
     constructor(TracerName, TracerVersion, ConnectionString) {
-        TelemetryProvider.TelemetryExporter = new monitor_opentelemetry_exporter_1.AzureMonitorTraceExporter({
+        this.TelemetryExporter = new monitor_opentelemetry_exporter_1.AzureMonitorTraceExporter({
             connectionString: ConnectionString
         });
-        TelemetryProvider.TelemetryProcessor = new sdk_trace_base_1.BatchSpanProcessor(TelemetryProvider.TelemetryExporter);
-        TelemetryProvider.TelemetryResource =
-            resources_1.Resource.default().merge(new resources_1.Resource({
+        this.TelemetryProcessor = new sdk_trace_base_1.BatchSpanProcessor(this.TelemetryExporter);
+        this.TelemetryResource =
+            resources_1.Resource.default().
+                merge(new resources_1.Resource({
                 [semantic_conventions_1.SemanticResourceAttributes.SERVICE_NAME]: TelemetryConstants_1.TelemetryConstants.ServiceName,
                 [semantic_conventions_1.SemanticResourceAttributes.SERVICE_VERSION]: TelemetryConstants_1.TelemetryConstants.ServiceVersion,
             }));
-        TelemetryProvider.Provider = new sdk_trace_node_1.NodeTracerProvider({
-            resource: TelemetryProvider.TelemetryResource,
+        this.Provider = new sdk_trace_node_1.NodeTracerProvider({
+            resource: this.TelemetryResource,
         });
-        TelemetryProvider.Provider.addSpanProcessor(TelemetryProvider.TelemetryProcessor);
-        TelemetryProvider.Provider.register();
-        api_1.trace.setGlobalTracerProvider(TelemetryProvider.Provider);
-        TelemetryProvider.TelemetryTracer = api_1.trace.getTracer(TracerName, TracerVersion);
+        this.Provider.addSpanProcessor(this.TelemetryProcessor);
+        this.Provider.register();
+        api_1.trace.setGlobalTracerProvider(this.Provider);
+        this.TelemetryTracer = api_1.trace.getTracer(TracerName, TracerVersion);
     }
-    static getTelemetryTracer() {
-        return TelemetryProvider.TelemetryTracer;
-    }
-    static startTracing(spanName, isroot, activeSpan = undefined, kind = 0, attributes = null) {
-        console.log("start of span");
-        const spanKind = TelemetryProvider.getSpanKind(kind);
-        let span;
-        if (activeSpan != undefined) {
-            const ctx = api_1.trace.setSpan(api_1.context.active(), activeSpan);
-            span = TelemetryProvider.TelemetryTracer.startSpan(spanName, { kind: spanKind }, ctx);
+    startTracing(spanName, parentSpan = undefined, kind = 0, message = undefined) {
+        const spanKind = this.getSpanKind(kind);
+        let ctx;
+        if (parentSpan == undefined) {
+            ctx = api_1.ROOT_CONTEXT;
         }
         else {
-            span = TelemetryProvider.TelemetryTracer.startSpan(spanName, { kind: spanKind, root: isroot });
+            ctx = api_1.trace.setSpan(this.getActiveContext(), parentSpan);
         }
-        if (attributes != undefined) {
-            this.setSpanTags(span, attributes);
+        const span = this.TelemetryTracer.startSpan(spanName, { kind: spanKind }, ctx);
+        if (message != undefined) {
+            this.setSpanTags(span, message);
         }
-        console.log("span context: ");
-        console.log(span.spanContext);
+        else {
+            this.setInitialTags(span);
+        }
         return span;
     }
-    static startTracingWith(spanName, func) {
-        const span = TelemetryProvider.TelemetryTracer.startSpan(spanName);
-        api_1.context.with(api_1.trace.setSpan(api_1.context.active(), span), func);
+    addTraceEvent(span, name, attrOrStartTime, startTime) {
+        span.addEvent(name, attrOrStartTime, startTime);
     }
-    static getSpanKind(kind) {
+    getTelemetryTracer() {
+        return this.TelemetryTracer;
+    }
+    getActiveContext() {
+        return api_1.context.active();
+    }
+    getSpanKind(kind) {
         if (kind == 0)
             return api_1.SpanKind.INTERNAL;
         else if (kind == 1)
@@ -64,21 +67,36 @@ class TelemetryProvider {
             return api_1.SpanKind.PRODUCER;
         return api_1.SpanKind.CONSUMER;
     }
-    static getCurrentSpanContext() {
-        return api_1.trace.getSpanContext(api_1.context.active());
-    }
-    static setSpanTags(span, attributes) {
-        if (attributes == null) {
-            throw new Error("NULL MESSAGE!!");
+    setSpanTags(span, message) {
+        if (message == null) {
+            throw new Error("NULL MESSAGE PASSED!!");
         }
         if (span.isRecording()) {
-            for (const [key, value] of Object.entries(attributes)) {
-                span.setAttribute(key, value);
+            span.setAttribute(TelemetryConstants_1.TelemetryConstants.TelemetryAppName, message.ApplicationName);
+            span.setAttribute(TelemetryConstants_1.TelemetryConstants.CreatedBy, message.CreatedBy);
+            span.setAttribute(TelemetryConstants_1.TelemetryConstants.CreatedAt, message.CreatedAt);
+            span.setAttribute(TelemetryConstants_1.TelemetryConstants.UserId, message.UserId);
+            if (message.CustomProperties != {}) {
+                for (const [key, value] of Object.entries(message.CustomProperties)) {
+                    span.setAttribute(TelemetryConstants_1.TelemetryConstants.TelemetryCustomProperties + "." + key, value);
+                }
             }
         }
     }
-    static endTracing(span) {
-        span.end();
+    setInitialTags(span) {
+        const message = new MessageContext_1.MessageContext();
+        if (span.isRecording()) {
+            span.setAttribute(TelemetryConstants_1.TelemetryConstants.TelemetryAppName, message.ApplicationName);
+            span.setAttribute(TelemetryConstants_1.TelemetryConstants.CreatedBy, message.CreatedBy);
+            span.setAttribute(TelemetryConstants_1.TelemetryConstants.CreatedAt, message.CreatedAt);
+            span.setAttribute(TelemetryConstants_1.TelemetryConstants.UserId, message.UserId);
+        }
+    }
+    endTracing(span, endTime) {
+        span.end(endTime);
+    }
+    getMessageContext() {
+        return new MessageContext_1.MessageContext();
     }
 }
 exports.TelemetryProvider = TelemetryProvider;
