@@ -41,7 +41,7 @@ export class TelemetryProvider{
         const spanKind: SpanKind =  this.getSpanKind(kind);
         let ctx: Context;
         if(parentSpan == undefined){
-            ctx = ROOT_CONTEXT
+            ctx = this.getActiveContext()
         }else{
             ctx = trace.setSpan(this.getActiveContext(), parentSpan)
         }
