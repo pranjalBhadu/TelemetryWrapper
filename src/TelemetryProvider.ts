@@ -54,6 +54,10 @@ export class TelemetryProvider{
         return span
     }
 
+    startTracingWith(span: Span, func: any): void{
+        context.with(trace.setSpan(context.active(), span), func)
+    }
+
     addTraceEvent(span: Span, name: string, attrOrStartTime?: Attributes|TimeInput, startTime?: TimeInput): void{
         span.addEvent(name, attrOrStartTime, startTime);
     }
