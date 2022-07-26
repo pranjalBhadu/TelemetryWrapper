@@ -47,6 +47,9 @@ class TelemetryProvider {
         }
         return span;
     }
+    startTracingWith(span, func) {
+        api_1.context.with(api_1.trace.setSpan(api_1.context.active(), span), func);
+    }
     addTraceEvent(span, name, attrOrStartTime, startTime) {
         span.addEvent(name, attrOrStartTime, startTime);
     }
