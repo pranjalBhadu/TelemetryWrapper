@@ -33,7 +33,7 @@ class TelemetryProvider {
         const spanKind = this.getSpanKind(kind);
         let ctx;
         if (parentSpan == undefined) {
-            ctx = api_1.ROOT_CONTEXT;
+            ctx = this.getActiveContext();
         }
         else {
             ctx = api_1.trace.setSpan(this.getActiveContext(), parentSpan);
