@@ -41,7 +41,7 @@ export class TelemetryProvider{
         const spanKind: SpanKind =  this.getSpanKind(kind);
         let ctx: Context;
         if(parentSpan == undefined){
-            ctx = this.getActiveContext()
+            ctx = ROOT_CONTEXT;
         }else{
             ctx = trace.setSpan(this.getActiveContext(), parentSpan)
         }
@@ -52,10 +52,6 @@ export class TelemetryProvider{
             this.setInitialTags(span);
         }
         return span
-    }
-
-    startTracingWith(span: Span, func: any): void{
-        context.with(trace.setSpan(context.active(), span), func)
     }
 
     addTraceEvent(span: Span, name: string, attrOrStartTime?: Attributes|TimeInput, startTime?: TimeInput): void{
