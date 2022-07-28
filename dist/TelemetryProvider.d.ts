@@ -12,7 +12,6 @@ export declare class TelemetryProvider {
     TelemetryTracer: Tracer;
     constructor(TracerName: string, TracerVersion: string, ConnectionString: string);
     startTracing(spanName: string, parentSpan?: Span | undefined, kind?: number, message?: MessageContext | undefined): Span;
-    startTracingWith(span: Span, func: any): void;
     addTraceEvent(span: Span, name: string, attrOrStartTime?: Attributes | TimeInput, startTime?: TimeInput): void;
     getTelemetryTracer(): Tracer;
     getActiveContext(): Context;
